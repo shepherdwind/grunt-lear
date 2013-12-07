@@ -22,9 +22,13 @@ module.exports = function(grunt) {
     lear: {
 
       base: {
-        expand: true,
-        cwd: 'test/',
-        src: '*/*.html'
+        files: [
+          {
+            expand: true,
+            cwd: 'test/',
+            src: '*/*.html'
+          }
+        ]
       }
 
     }

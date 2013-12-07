@@ -11,14 +11,19 @@ function parse(str, customTags){
 
     onopentag: function(name, attribs){
 
-      result += '<' + name + Object.keys(attribs).map(function(key){
-        return key + '=' + attribs[key]
-      }).join(' ') + '>'
+      result += '<' + name;
+      var attrstr = Object.keys(attribs).map(function(key){
+        return util.format('%s="%s"', key, attribs[key])
+      }).join(' ')
+
+      if (attrstr.length > 0) attrstr = ' ' + attrstr
+
+      result += attrstr + '>'
 
       if (customTags.indexOf(name) > -1 || attribs['data-path']) {
         parts.push(result)
         result = ''
-        var requirePath = attribs['data-path'] || '../' + name + '/index.html'
+        var requirePath = attribs['data-path'] || '../' + name + '/index'
         parts.push({ require: util.format('"%s"', requirePath) })
       }
 
