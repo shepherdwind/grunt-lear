@@ -1,6 +1,11 @@
 var htmlparser = require("htmlparser2")
 var util = require("util")
 
+var selfCloseTags = [
+  'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input',
+  'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'
+]
+
 function parse(str, customTags){
 
   customTags = customTags || []
@@ -32,7 +37,9 @@ function parse(str, customTags){
       result += text
     },
     onclosetag: function(tagname){
-      result += '</' + tagname + '>'
+      if (selfCloseTags.indexOf(tagname) === -1) {
+        result += '</' + tagname + '>'
+      }
     }
   })
 
