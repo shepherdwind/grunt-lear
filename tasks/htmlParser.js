@@ -12,6 +12,8 @@ function parse(str, customTags){
 
   var parts = []
   var result = ''
+  var selectParts = [];
+
   var parser = new htmlparser.Parser({
 
     onopentag: function(name, attribs){
@@ -26,10 +28,11 @@ function parse(str, customTags){
       result += attrstr + '>'
 
       if (customTags.indexOf(name) > -1 || attribs['data-path']) {
-        parts.push(result)
+        parts.push(result + util.format('{{@with %s}}', name))
         result = ''
         var requirePath = attribs['data-path'] || '../' + name + '/index'
         parts.push({ require: util.format('"%s"', requirePath) })
+        selectParts.push(name)
       }
 
     },
@@ -38,7 +41,11 @@ function parse(str, customTags){
     },
     onclosetag: function(tagname){
       if (selfCloseTags.indexOf(tagname) === -1) {
-        result += '</' + tagname + '>'
+        if (selectParts.indexOf(tagname) > -1) {
+          result += util.format('{{/with}}</%s>', tagname)
+        } else {
+          result += '</' + tagname + '>'
+        }
       }
     }
   })
