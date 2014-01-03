@@ -1,3 +1,4 @@
+/*jsl:ignore*/
 var htmlparser = require("htmlparser2")
 var util = require("util")
 
@@ -20,8 +21,20 @@ function parse(str, customTags){
 
       result += '<' + name;
       var attrstr = Object.keys(attribs).map(function(key){
-        return util.format('%s="%s"', key, attribs[key])
+
+        // 在属性中, {{@if a}}xx{{/if}} 会被识别为{{@if a}}xx{{ if}} 几个属性
+        if (key.indexOf('}}') === key.length - 2) {
+          return '/' + key;
+        }
+        // {{@if x}}被识别为dom属性，需要忽略
+        if (key.indexOf('{{') === -1){
+          return util.format('%s="%s"', key, attribs[key])
+        } else {
+          return key
+        }
       }).join(' ')
+
+      attrstr = attrstr.replace(/\{\{ \//g, '{{/')
 
       if (attrstr.length > 0) attrstr = ' ' + attrstr
 
@@ -31,7 +44,7 @@ function parse(str, customTags){
         parts.push(result + util.format('{{@with %s}}', name))
         result = ''
         var requirePath = attribs['data-path'] || '../' + name + '/index'
-        parts.push({ require: util.format('"%s"', requirePath) })
+        parts.push({ require: util.format('"%s"', requirePath), tagname: name })
         selectParts.push(name)
       }
 
@@ -59,4 +72,4 @@ function parse(str, customTags){
 }
 //var a = parse("xx<custom-tag data-path=\"./mod2/\"></custom-tag> hello")
 //console.log(a)
-exports.parse = parse
+exports.parse = parse; /*jsl:end*/
