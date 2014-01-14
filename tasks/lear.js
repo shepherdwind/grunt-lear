@@ -57,7 +57,7 @@ module.exports = function (grunt) {
 
       }).map(function (filepath) {
 
-        var content =  grunt.file.read(filepath).replace(/\n+/g, '\\n'). replace(/'/g, '\\\'')
+        var content =  grunt.file.read(filepath).replace(/[\n\r]+/g, '\\n').replace(/'/g, '\\\'')
 
         var dirs = fs.readdirSync(pwd).filter(function(file){
           var stat = fs.statSync(path.join(pwd, file))
