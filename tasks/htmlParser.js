@@ -15,6 +15,11 @@ function parse(str, customTags){
   var result = ''
   var selectParts = [];
 
+  // XTemplate中的等于符号，会引起问题，先转换为 #&equal;符号
+  var str = str.replace(/{{[^}]+}}/g, function(reg){
+    return reg.replace(/=/g, '#&equal;')
+  })
+
   var parser = new htmlparser.Parser({
 
     onopentag: function(name, attribs){
@@ -23,15 +28,17 @@ function parse(str, customTags){
       var attrstr = Object.keys(attribs).map(function(key){
 
         // 在属性中, {{@if a}}xx{{/if}} 会被识别为{{@if a}}xx{{ if}} 几个属性
-        if (key.indexOf('}}') === key.length - 2) {
+        if (key.indexOf('{{') === -1 && key.indexOf('}}') === key.length - 2) {
           return '/' + key;
         }
+
         // {{@if x}}被识别为dom属性，需要忽略
         if (key.indexOf('{{') === -1){
           return util.format('%s="%s"', key, attribs[key])
         } else {
-          return key
+          return key.replace(/#&equal;/g, '=')
         }
+
       }).join(' ')
 
       attrstr = attrstr.replace(/\{\{ \//g, '{{/')
